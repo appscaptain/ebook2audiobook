@@ -38,7 +38,7 @@ coqui-tts==0.27.2
 # fugashi
 # sudachipy
 # sudachidict_core
-# unidic
+unidic
 # hangul-romanize
 # indic-nlp-library
 # soynlp
@@ -46,4 +46,5 @@ coqui-tts==0.27.2
 # pycantonese
 # pypinyin
 # pythainlp
+
 
