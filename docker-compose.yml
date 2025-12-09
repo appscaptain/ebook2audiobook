@@ -1,63 +1,47 @@
+version: "3.8"
+
 services:
+  # -----------------------------------------------------
+  # SERVICE 1: PDF Cleaner (Uses Dockerfile.cleaner)
+  # -----------------------------------------------------
+  pdf-cleaner:
+    build:
+      context: .
+      dockerfile: Dockerfile.cleaner
+    container_name: pdf-cleaner
+    restart: unless-stopped
+    volumes:
+      # SHARED VOLUME: Both apps will see this data
+      - audiobook-data:/app/data
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+
+  # -----------------------------------------------------
+  # SERVICE 2: Ebook2Audiobook (Uses standard Dockerfile)
+  # -----------------------------------------------------
   ebook2audiobook:
-    #image: docker.io/athomasson2/ebook2audiobook:latest  # <-- Use prebuilt image instead of building
-    image: ${BUILD_NAME}
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        DOCKER_DEVICE_STR: "cpu"
     container_name: ebook2audiobook
-    working_dir: /app
-    # To update ebook2audiobook to the latest you may have to rebuild  
-    entrypoint: ["python", "app.py", "--script_mode", "full_docker"]
-    command: [] # <- Extra ebook2audiobook parameters can be added here
-    # The dir containing this docker-compose.yml file will be used as the base directory for any commands.
-    # Example Headless || command: ["--headless", "--ebook", "The-Tell-Tale-Heart.epub", "--tts_engine", "yourtts"] # "The-Tell-Tale-Heart.epub" file is located in the same dir as this docker-compose.yml. # More compose headless info can be found at wiki "https://github.com/DrewThomasson/ebook2audiobook/wiki/Docker-Compose-Headless-guide"
-    tty: true
-    stdin_open: true
+    restart: unless-stopped
     ports:
-      - 7860:7860 # Maps container's port 7860 to the host's port 7860.
-
-    # ---------------------------------------------------
-    # UNIVERSAL GPU SUPPORT (NVIDIA + ROCm + Intel XPU)
-    # ---------------------------------------------------
-
-    # NVIDIA (WSL2 + Linux)
-    # NOTE:
-    # - Docker: we do NOT use "runtime: nvidia" or "gpus: all" here, because those will fail
-    #   when nvidia-container-toolkit is not installed.
-    # - Podman: does not support "runtime: nvidia" either.
-    # Instead we run the container in privileged mode so that any existing GPU devices
-    # (/dev/nvidia*, /dev/kfd, /dev/dri, etc.) are visible automatically.
-    # On systems without those devices, the container still starts and just runs on CPU.
-    privileged: true
-
-    # Needed for ROCm + Intel iGPU (ignored if groups do not exist inside the container)
-    group_add:
-      - video
-      - render
-
-    # Additional optional NVIDIA request (ignored on non-NVIDIA)
-    # NOTE:
-    # - Docker Swarm understands `deploy.resources.*` with "driver: nvidia".
-    # - Regular docker-compose and Podman ignore `deploy` completely.
-    # We keep this block only for symmetry with Swarm / future use.
+      - "7860:7860"
+    environment:
+      - CUDA_VISIBLE_DEVICES=-1
+      - TTS_ENGINE=edge
+    volumes:
+      # Mounts the same volume as the cleaner
+      - audiobook-data:/app/results
+    command: ["--headless"]
     deploy:
       resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: ["gpu"]
-        limits: {} # Keeps limits as an empty mapping to avoid errors. Uncomment and configure below.
+        limits:
+          memory: 4g
 
-    volumes:
-      - ./:/app  # Maps the local directory to the container.
-
-# Common Issues: ----
-# --> `python: can't open file '/home/user/app/app.py': [Errno 2] No such file or directory`
-# Removed all post arguments as CMD was replaced with ENTRYPOINT in the Dockerfile  
-# Example correction:  
-# Before: command: ["python", "app.py", "--script_mode", "full_docker"] or -> `docker run athomasson2/ebook2audiobook python app.py --script_mode full_docker`
-# After: nothing needed  or just -> `docker run athomasson2/ebook2audiobook`
-# Extra arguments after app.py can still be added to the -> command: [] 
-# Example adding extra arguments -> command: ["--share"] or -> command: ["--help"]
+volumes:
+  audiobook-data:
