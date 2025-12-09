@@ -1,0 +1,2 @@
+# Requirements for PDF Cleaner
+# Currently uses system tools (poppler-utils)
