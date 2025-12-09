@@ -35,17 +35,18 @@ coqui-tts==0.27.2
 
 # --- OPTIONAL: ASIAN & INDIC LANGUAGE SUPPORT ---
 # Commented out to save space. Uncomment if you need to process these specific languages.
-# fugashi
-# sudachipy
-# sudachidict_core
+fugashi
+sudachipy
+sudachidict_core
 unidic
-# hangul-romanize
-# indic-nlp-library
+hangul-romanize
+indic-nlp-library
 soynlp
-# jieba
-# pycantonese
-# pypinyin
-# pythainlp
+jieba
+pycantonese
+pypinyin
+pythainlp
+
 
 
 
