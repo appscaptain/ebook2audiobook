@@ -41,10 +41,11 @@ coqui-tts==0.27.2
 unidic
 # hangul-romanize
 # indic-nlp-library
-# soynlp
+soynlp
 # jieba
 # pycantonese
 # pypinyin
 # pythainlp
+
 
 
