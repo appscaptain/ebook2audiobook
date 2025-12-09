@@ -37,7 +37,8 @@ services:
     volumes:
       # Mounts the same volume as the cleaner
       - audiobook-data:/app/results
-    command: ["--headless"]
+      # Dsiabled because Error: In headless mode, you must specify either an ebook file using --ebook or an ebook directory using --ebooks_dir.
+    # command: ["--headless"]
     deploy:
       resources:
         limits:
