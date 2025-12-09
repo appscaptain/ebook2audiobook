@@ -1,24 +1,17 @@
-# Dockerfile.cleaner
 FROM python:3.12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install basic tools for PDF processing (adjust if your cleaner needs more)
+# Install PDF tools (poppler-utils gives us 'pdftotext')
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    build-essential \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the entire repo so the cleaner script is available
+# Copy all files (including cleaner_script.py)
 COPY . /app
 
-# Install any requirements if a requirements.txt exists
-RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
-
-# Default command - keeps container running so you can exec into it or run scripts
-CMD ["tail", "-f", "/dev/null"]
+# Run the cleaner script automatically
+CMD ["python3", "cleaner_script.py"]
